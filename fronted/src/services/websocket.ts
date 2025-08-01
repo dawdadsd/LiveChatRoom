@@ -23,6 +23,9 @@ export interface UserInfo {
   name: string
   avatar: string
   isAnonymous: boolean
+  userType?: 'teacher' | 'student'
+  department?: string
+  email?: string
 }
 
 export interface FrontendMessage {

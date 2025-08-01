@@ -1,10 +1,10 @@
 @import "tailwindcss";
 
 :root {
-    font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
-    line-height: 1.5;
+    font-family: "Noto Serif SC", "Source Han Serif SC", serif, system-ui, Avenir, Helvetica, Arial, sans-serif;
+    line-height: 1.6;
     font-weight: 400;
-    color-scheme: light dark;
+    color-scheme: light;
     font-synthesis: none;
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
@@ -15,4 +15,57 @@ body {
     margin: 0;
     min-width: 320px;
     min-height: 100vh;
+    background-color: #fafaf9; /* stone-50 */
+    color: #1e293b; /* slate-800 */
+}
+
+/* 水墨风格滚动条 */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f5f9; /* slate-100 */
+    border: 1px solid #cbd5e1; /* slate-300 */
+}
+
+::-webkit-scrollbar-thumb {
+    background: #64748b; /* slate-500 */
+    border: 1px solid #475569; /* slate-600 */
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #475569; /* slate-600 */
+}
+
+/* 水墨纸质纹理效果 */
+.ink-paper-texture {
+    background-image:
+        radial-gradient(circle at 20% 50%, rgba(120, 119, 198, 0.03) 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, rgba(120, 119, 198, 0.03) 0%, transparent 50%),
+        radial-gradient(circle at 40% 80%, rgba(120, 119, 198, 0.03) 0%, transparent 50%);
+}
+
+/* 水墨晕染效果 */
+.ink-diffusion {
+    position: relative;
+    overflow: hidden;
+}
+
+.ink-diffusion::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(15, 23, 42, 0.05) 0%, transparent 70%);
+    animation: ink-spread 3s ease-out infinite;
+}
+
+@keyframes ink-spread {
+    0% { transform: scale(0.8) rotate(0deg); opacity: 0.3; }
+    50% { transform: scale(1.2) rotate(180deg); opacity: 0.1; }
+    100% { transform: scale(1.5) rotate(360deg); opacity: 0; }
 }
