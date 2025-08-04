@@ -1,6 +1,6 @@
 package xiaowu.social_network_demo.service;
 
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -21,9 +21,7 @@ public class MyUserDetailsService implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         // 1. 根据用户名查数据库
-User user = userMapper.selectOne(
-                new LambdaQueryWrapper<User>().eq(User::getUsername, username)
-        );
+         User user=new User();
 
 
 
