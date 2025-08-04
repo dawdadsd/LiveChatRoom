@@ -14,7 +14,5 @@ class SocialNetworkDemoApplicationTests {
     @Test
     void contextLoads() {
 
-
-
     }
 }

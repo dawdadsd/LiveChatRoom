@@ -1,6 +1,7 @@
 package xiaowu.social_network_demo.service;
 
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -21,11 +22,12 @@ public class MyUserDetailsService implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         // 1. 根据用户名查数据库
-         User user=new User();
+        User user = userMapper.selectOne(
+                new QueryWrapper<User>().eq("username", username)
+        );
 
 
-
- if (user == null) {
+        if (user == null) {
             throw new UsernameNotFoundException("用户不存在");
         }
 
