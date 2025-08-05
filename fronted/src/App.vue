@@ -2,6 +2,7 @@
 import { ref, onUnmounted, onMounted } from 'vue'
 import UserLogin from './components/UserLogin.vue'
 import AuthLogin from './components/AuthLogin.vue'
+import UserRegister from './components/UserRegister.vue'
 import OnlineUsers from './components/OnlineUsers.vue'
 import ChatRoom from './components/ChatRoom.vue'
 import DemoUsers from './components/DemoUsers.vue'
@@ -13,7 +14,7 @@ const isLoggedIn = ref(false)
 const currentUser = ref<UserInfo | null>(null)
 const isConnecting = ref(false)
 const connectionError = ref<string | null>(null)
-const loginMode = ref<'auth' | 'quick'>('auth') // 登录模式：认证登录或快速登录
+const loginMode = ref<'auth' | 'quick' | 'register'>('auth') // 登录模式：认证登录、快速登录或注册
 
 // 在线用户数据 - 现在从WebSocket获取
 const onlineUsers = ref<User[]>([])
@@ -98,6 +99,15 @@ const switchToAuthLogin = () => {
   loginMode.value = 'auth'
 }
 
+const switchToRegister = () => {
+  loginMode.value = 'register'
+}
+
+// 注册成功处理
+const handleRegisterSuccess = () => {
+  loginMode.value = 'auth'
+}
+
 // 设置WebSocket连接状态监听
 wsService.onConnection((connected) => {
   isConnected.value = connected
@@ -132,6 +142,7 @@ onUnmounted(() => {
         :connection-error="connectionError"
         @user-login="handleAuthLogin"
         @switch-to-quick-login="switchToQuickLogin"
+        @switch-to-register="switchToRegister"
     />
 
     <UserLogin
@@ -140,6 +151,13 @@ onUnmounted(() => {
         :connection-error="connectionError"
         @user-login="handleUserLogin"
         @switch-to-auth-login="switchToAuthLogin"
+    />
+
+    <!-- 注册页面 -->
+    <UserRegister
+        v-if="!isLoggedIn && loginMode === 'register'"
+        @register-success="handleRegisterSuccess"
+        @switch-to-login="switchToAuthLogin"
     />
 
     <!-- 聊天室主界面 -->

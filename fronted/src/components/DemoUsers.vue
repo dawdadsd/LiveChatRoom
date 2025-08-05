@@ -1,12 +1,47 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { authService } from '../services/authService'
 
 const showDemo = ref(false)
-const mockUsers = authService.getMockUsers()
 
-const teacherUsers = mockUsers.filter(user => user.userType === 'teacher')
-const studentUsers = mockUsers.filter(user => user.userType === 'student')
+// 示例用户数据（仅用于演示）
+const demoUsers = {
+  teachers: [
+    {
+      id: 1,
+      name: '张伟教授',
+      username: 'teacher001',
+      department: '计算机科学与技术学院',
+      avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face',
+      email: 'zhang.wei@university.edu'
+    },
+    {
+      id: 2,
+      name: '李明副教授',
+      username: 'teacher002',
+      department: '软件工程学院',
+      avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face',
+      email: 'li.ming@university.edu'
+    }
+  ],
+  students: [
+    {
+      id: 1,
+      name: '王小明',
+      username: 'student001',
+      department: '计算机科学与技术',
+      avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&h=150&fit=crop&crop=face',
+      email: 'wang.xiaoming@student.edu'
+    },
+    {
+      id: 2,
+      name: '刘小红',
+      username: 'student002',
+      department: '软件工程',
+      avatar: 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=150&h=150&fit=crop&crop=face',
+      email: 'liu.xiaohong@student.edu'
+    }
+  ]
+}
 
 const copyToClipboard = (text: string) => {
   navigator.clipboard.writeText(text).then(() => {
@@ -21,7 +56,7 @@ const copyToClipboard = (text: string) => {
     <button
       @click="showDemo = !showDemo"
       class="bg-slate-800 text-white p-3 border-2 border-slate-600 hover:bg-slate-900 hover:border-slate-800 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 relative"
-      title="查看演示账户"
+      title="查看使用指南"
     >
       <!-- 印章装饰 -->
       <div class="absolute -top-1 -right-1 w-2 h-2 bg-emerald-600"></div>
@@ -54,8 +89,8 @@ const copyToClipboard = (text: string) => {
 
         <div class="flex items-center justify-between">
           <div>
-            <h2 class="text-2xl font-bold">演示账户信息</h2>
-            <p class="text-slate-200 mt-1 border-l-2 border-slate-600 pl-2">点击用户名或密码可复制</p>
+            <h2 class="text-2xl font-bold">使用指南</h2>
+            <p class="text-slate-200 mt-1 border-l-2 border-slate-600 pl-2">了解如何注册和使用系统</p>
           </div>
           <button
             @click="showDemo = false"
@@ -69,15 +104,59 @@ const copyToClipboard = (text: string) => {
       </div>
 
       <div class="p-6">
-        <!-- 教师账户 -->
+        <!-- 注册提示 -->
+        <div class="mb-8 p-6 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-xl">
+          <h3 class="text-xl font-semibold text-slate-800 mb-4 flex items-center">
+            <span class="text-2xl mr-2">🚀</span>
+            开始使用
+          </h3>
+          <div class="space-y-4">
+            <p class="text-slate-700">
+              欢迎使用社交网络演示系统！现在您需要先注册一个账户才能使用完整功能。
+            </p>
+            <div class="grid gap-4 md:grid-cols-2">
+              <div class="bg-white p-4 rounded-lg border border-blue-200">
+                <h4 class="font-semibold text-slate-800 mb-2 flex items-center">
+                  <span class="text-lg mr-2">👨‍🏫</span>
+                  教师注册
+                </h4>
+                <p class="text-sm text-slate-600 mb-3">
+                  注册教师账户，管理学生信息，查看同事列表
+                </p>
+                <ul class="text-xs text-slate-500 space-y-1">
+                  <li>• 需要填写工号、院系、职称等信息</li>
+                  <li>• 可以查看所有学生列表</li>
+                  <li>• 可以查看同院系教师</li>
+                </ul>
+              </div>
+
+              <div class="bg-white p-4 rounded-lg border border-blue-200">
+                <h4 class="font-semibold text-slate-800 mb-2 flex items-center">
+                  <span class="text-lg mr-2">🎓</span>
+                  学生注册
+                </h4>
+                <p class="text-sm text-slate-600 mb-3">
+                  注册学生账户，查看同学信息，联系任课教师
+                </p>
+                <ul class="text-xs text-slate-500 space-y-1">
+                  <li>• 需要填写学号、专业、年级等信息</li>
+                  <li>• 可以查看同专业同学</li>
+                  <li>• 可以查看本专业教师</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 示例用户信息 -->
         <div class="mb-8">
           <h3 class="text-xl font-semibold text-slate-800 mb-4 flex items-center">
             <span class="text-2xl mr-2">👨‍🏫</span>
-            教师账户
+            教师示例
           </h3>
           <div class="grid gap-4 md:grid-cols-2">
             <div
-              v-for="teacher in teacherUsers"
+              v-for="teacher in demoUsers.teachers"
               :key="teacher.id"
               class="bg-gradient-to-r from-purple-50 to-pink-50 border border-purple-200 rounded-xl p-4"
             >
@@ -94,23 +173,13 @@ const copyToClipboard = (text: string) => {
               </div>
               <div class="space-y-2 text-sm">
                 <div class="flex items-center justify-between">
-                  <span class="text-slate-600">用户名:</span>
+                  <span class="text-slate-600">建议用户名:</span>
                   <button
                     @click="copyToClipboard(teacher.username)"
                     class="font-mono bg-white px-2 py-1 rounded border hover:bg-slate-50 transition-colors"
                     title="点击复制"
                   >
                     {{ teacher.username }}
-                  </button>
-                </div>
-                <div class="flex items-center justify-between">
-                  <span class="text-slate-600">密码:</span>
-                  <button
-                    @click="copyToClipboard('teacher' + teacher.username.slice(-3))"
-                    class="font-mono bg-white px-2 py-1 rounded border hover:bg-slate-50 transition-colors"
-                    title="点击复制"
-                  >
-                    teacher{{ teacher.username.slice(-3) }}
                   </button>
                 </div>
                 <div class="flex items-center justify-between">
@@ -122,15 +191,15 @@ const copyToClipboard = (text: string) => {
           </div>
         </div>
 
-        <!-- 学生账户 -->
+        <!-- 学生示例 -->
         <div>
           <h3 class="text-xl font-semibold text-slate-800 mb-4 flex items-center">
             <span class="text-2xl mr-2">🎓</span>
-            学生账户
+            学生示例
           </h3>
           <div class="grid gap-4 md:grid-cols-2">
             <div
-              v-for="student in studentUsers"
+              v-for="student in demoUsers.students"
               :key="student.id"
               class="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-xl p-4"
             >
@@ -147,23 +216,13 @@ const copyToClipboard = (text: string) => {
               </div>
               <div class="space-y-2 text-sm">
                 <div class="flex items-center justify-between">
-                  <span class="text-slate-600">用户名:</span>
+                  <span class="text-slate-600">建议用户名:</span>
                   <button
                     @click="copyToClipboard(student.username)"
                     class="font-mono bg-white px-2 py-1 rounded border hover:bg-slate-50 transition-colors"
                     title="点击复制"
                   >
                     {{ student.username }}
-                  </button>
-                </div>
-                <div class="flex items-center justify-between">
-                  <span class="text-slate-600">密码:</span>
-                  <button
-                    @click="copyToClipboard('student' + student.username.slice(-3))"
-                    class="font-mono bg-white px-2 py-1 rounded border hover:bg-slate-50 transition-colors"
-                    title="点击复制"
-                  >
-                    student{{ student.username.slice(-3) }}
                   </button>
                 </div>
                 <div class="flex items-center justify-between">
@@ -184,10 +243,11 @@ const copyToClipboard = (text: string) => {
             使用说明
           </h4>
           <ul class="text-sm text-amber-700 space-y-1">
+            <li>• 点击"立即注册"创建新账户</li>
             <li>• 选择对应的用户类型（教师/学生）</li>
-            <li>• 输入上述用户名和密码进行登录</li>
-            <li>• 登录成功后会显示用户的详细信息</li>
-            <li>• 支持"记住我"功能，下次访问自动填充</li>
+            <li>• 填写完整的注册信息</li>
+            <li>• 注册成功后使用账户信息登录</li>
+            <li>• 登录成功后可以使用完整的社交功能</li>
             <li>• 也可以选择"快速进入聊天室"进行匿名聊天</li>
           </ul>
         </div>

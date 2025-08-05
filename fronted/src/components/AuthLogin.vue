@@ -13,11 +13,12 @@ const props = defineProps<Props>()
 const emit = defineEmits<{
   userLogin: [user: AuthUser]
   switchToQuickLogin: []
+  switchToRegister: []
 }>()
 
 // 表单数据
 const formData = reactive<LoginCredentials>({
-  userType: 'student',
+  userType: 'STUDENT',
   username: '',
   password: '',
   rememberMe: false
@@ -38,15 +39,15 @@ const hasInteracted = reactive({
 
 // 计算属性
 const isFormValid = computed(() => {
-  return formData.userType && 
-         formData.username.trim() && 
-         formData.password.trim() && 
+  return formData.userType &&
+         formData.username.trim() &&
+         formData.password.trim() &&
          Object.keys(errors).length === 0
 })
 
 const userTypeOptions = [
-  { value: 'student', label: '学生', icon: '🎓', color: 'from-blue-500 to-indigo-500' },
-  { value: 'teacher', label: '教师', icon: '👨‍🏫', color: 'from-purple-500 to-pink-500' }
+  { value: 'STUDENT', label: '学生', icon: '🎓', color: 'from-blue-500 to-indigo-500' },
+  { value: 'TEACHER', label: '教师', icon: '👨‍🏫', color: 'from-purple-500 to-pink-500' }
 ]
 
 // 防抖验证函数
@@ -117,11 +118,16 @@ const switchToQuickLogin = () => {
   emit('switchToQuickLogin')
 }
 
+// 切换到注册
+const switchToRegister = () => {
+  emit('switchToRegister')
+}
+
 // 组件挂载时恢复记住的用户信息
 onMounted(() => {
   const remembered = authService.getRememberedUser()
   if (remembered) {
-    formData.userType = remembered.userType as 'teacher' | 'student'
+    formData.userType = remembered.userType
     formData.username = remembered.username
     formData.rememberMe = true
   }
@@ -294,13 +300,20 @@ onMounted(() => {
           <p class="text-red-700 text-sm font-medium">{{ loginError || connectionError }}</p>
         </div>
 
-        <!-- 快速登录选项 -->
-        <div class="mt-6 text-center border-t border-slate-200 pt-4">
+        <!-- 其他选项 -->
+        <div class="mt-6 text-center border-t border-slate-200 pt-4 space-y-3">
           <button
             @click="switchToQuickLogin"
-            class="text-sm text-slate-600 hover:text-slate-900 transition-colors group"
+            class="block w-full text-sm text-slate-600 hover:text-slate-900 transition-colors group"
           >
             或者 <span class="text-emerald-700 hover:text-emerald-900 font-bold border-b border-transparent group-hover:border-emerald-700">快速进入聊天室</span>
+          </button>
+
+          <button
+            @click="switchToRegister"
+            class="block w-full text-sm text-slate-600 hover:text-slate-900 transition-colors group"
+          >
+            还没有账户？<span class="text-blue-700 hover:text-blue-900 font-bold border-b border-transparent group-hover:border-blue-700">立即注册</span>
           </button>
         </div>
       </div>
