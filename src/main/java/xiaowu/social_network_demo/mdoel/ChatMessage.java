@@ -18,7 +18,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-
 public class ChatMessage {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -45,7 +44,7 @@ public class ChatMessage {
     /**
      * 目标IP地址（点对点消息时使用）
      */
-    @Column(name = "targetIp", nullable = false, length = 50)
+    @Column(name = "targetIp", nullable = true, length = 50)
     private String targetIp;
 
     /**
@@ -58,7 +57,7 @@ public class ChatMessage {
     /**
      * 消息内容
      */
-    @Column(name = "content", nullable = false, columnDefinition = "TEXT")
+    @Column(name = "content", nullable = false, columnDefinition = "TEXT" )
     private String content;
 
     /**

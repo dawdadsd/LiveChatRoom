@@ -23,6 +23,7 @@ public class ClassGroup {
             inverseJoinColumns = @JoinColumn(name = "user_id")
     )
     private Set<User> members = new HashSet<>();
-    @OneToMany(mappedBy = "classGroup")
+    @OneToMany
+    @JoinColumn(name = "class_group_id")
     private Set<Group> groups = new HashSet<>();
 }
