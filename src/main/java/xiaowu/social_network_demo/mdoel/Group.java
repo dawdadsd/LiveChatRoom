@@ -13,7 +13,7 @@ import java.util.Set;
 public class Group {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id; // 组ID，唯一标识
+    private Integer id; // 组ID，唯一标识
 
     @Column(nullable = false, unique = true)
     private String groupName; // 组名
