@@ -19,7 +19,7 @@ import java.time.LocalDateTime;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public abstract class User {
+public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -58,7 +58,9 @@ public abstract class User {
     private Boolean isActive = true;
 
     // 抽象方法，子类必须实现
-    public abstract String getUserType();
+    public String getUserType(){
+        return role != null ? role.name() : null;
+    }
 
     // 通用方法
     public boolean isStudent() {

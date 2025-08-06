@@ -147,7 +147,7 @@ public class AuthService {
         teacher.setUpdatedAt(LocalDateTime.now());
         teacher.setIsActive(true);
 
-        return userMapper.insert(teacher) > 0;
+        return userMapper.insertUser(teacher) ;
     }
 
     /**
