@@ -39,11 +39,11 @@ public class User {
     @Column(name = "role")
     private UserRole role;
 
-    @ManyToMany(mappedBy = "members")
-    private Set<Group> groups = new HashSet<>();
+   /* @ManyToMany(mappedBy = "members")
+    private Set<Group> groups = new HashSet<>();*/
 
-    @ManyToMany(mappedBy = "members")
-    private Set<ClassGroup> classGroups = new HashSet<>();
+    /*@ManyToMany(mappedBy = "members")
+    private Set<ClassGroup> classGroups = new HashSet<>();*/
 
     @Column(name = "real_name")
     private String realName;
