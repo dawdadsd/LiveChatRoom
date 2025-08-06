@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>课时小组学习通讯平台 - 原型演示</title>
+    <style>
+        /* 全局样式 */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', sans-serif;
+            background: #f5f5f7;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* 登录页样式 */
+        .login-container {
+            display: none;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .login-box {
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            width: 400px;
+        }
+        .login-box h2 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #333;
+        }
+        .login-box input {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 20px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+        .login-box button {
+            width: 100%;
+            padding: 12px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        .login-box button:hover {
+            background: #5a67d8;
+        }
+        .role-select {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .role-select label {
+            flex: 1;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .role-select input[type="radio"] {
+            display: none;
+        }
+        .role-select input[type="radio"]:checked + label {
+            border-color: #667eea;
+            background: #f0f4ff;
+            color: #667eea;
+        }
+
+        /* 主界面布局 */
+        .main-container {
+            display: flex;
+            height: 100vh;
+        }
+
+        /* 左侧边栏 */
+        .sidebar {
+            width: 280px;
+            background: #2c3e50;
+            color: white;
+            display: flex;
+            flex-direction: column;
+        }
+        .user-info {
+            padding: 20px;
+            background: #243342;
+            border-bottom: 1px solid #1a252f;
+        }
+        .user-info .avatar {
+            width: 50px;
+            height: 50px;
+            background: #667eea;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            font-size: 20px;
+            vertical-align: middle;
+        }
+        .user-info .name {
+            display: inline-block;
+            vertical-align: middle;
+        }
+        .user-info .role {
+            display: inline-block;
+            padding: 2px 8px;
+            background: #667eea;
+            border-radius: 12px;
+            font-size: 12px;
+            margin-left: 10px;
+        }
+
+        /* 分组列表 */
+        .group-section {
+            flex: 1;
+            overflow-y: auto;
+        }
+        .group-header {
+            padding: 15px 20px 10px;
+            font-size: 12px;
+            opacity: 0.7;
+            text-transform: uppercase;
+        }
+        .group-item {
+            padding: 12px 20px;
+            cursor: pointer;
+            transition: background 0.2s;
+            border-left: 3px solid transparent;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .group-item:hover {
+            background: #34495e;
+        }
+        .group-item.active {
+            background: #34495e;
+            border-left-color: #667eea;
+        }
+        .group-icon {
+            margin-right: 12px;
+            opacity: 0.8;
+        }
+        .unread-count {
+            background: #e74c3c;
+            color: white;
+            padding: 2px 6px;
+            border-radius: 10px;
+            font-size: 11px;
+            min-width: 20px;
+            text-align: center;
+        }
+        .online-indicator {
+            width: 8px;
+            height: 8px;
+            background: #2ecc71;
+            border-radius: 50%;
+            display: inline-block;
+            margin-left: 5px;
+        }
+
+        /* 操作按钮区 */
+        .sidebar-actions {
+            padding: 15px;
+            border-top: 1px solid #1a252f;
+        }
+        .btn-create-group {
+            width: 100%;
+            padding: 10px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.3s;
+        }
+        .btn-create-group:hover {
+            background: #5a67d8;
+        }
+
+        /* 中间聊天区域 */
+        .chat-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: white;
+        }
+        .chat-header {
+            padding: 20px;
+            background: #fff;
+            border-bottom: 1px solid #e1e4e8;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .chat-header h3 {
+            font-size: 18px;
+            color: #333;
+        }
+        .chat-header .status {
+            font-size: 12px;
+            color: #999;
+        }
+        .header-actions {
+            display: flex;
+            gap: 15px;
+        }
+        .header-actions button {
+            padding: 8px 16px;
+            background: #f6f8fa;
+            border: 1px solid #e1e4e8;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            transition: background 0.2s;
+        }
+        .header-actions button:hover {
+            background: #e1e4e8;
+        }
+
+        /* 消息显示区 */
+        .messages-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            background: #fafbfc;
+        }
+        .message {
+            margin-bottom: 20px;
+            display: flex;
+            align-items: flex-start;
+        }
+        .message.self {
+            flex-direction: row-reverse;
+        }
+        .message-avatar {
+            width: 36px;
+            height: 36px;
+            background: #667eea;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            margin: 0 12px;
+            font-size: 14px;
+        }
+        .message-content {
+            max-width: 60%;
+        }
+        .message-info {
+            font-size: 12px;
+            color: #999;
+            margin-bottom: 5px;
+        }
+        .message.self .message-info {
+            text-align: right;
+        }
+        .message-bubble {
+            padding: 10px 15px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+        }
+        .message.self .message-bubble {
+            background: #667eea;
+            color: white;
+        }
+        .file-message {
+            padding: 10px;
+            background: #f6f8fa;
+            border: 1px solid #e1e4e8;
+            border-radius: 6px;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+        }
+        .file-message:hover {
+            background: #e1e4e8;
+        }
+        .system-message {
+            text-align: center;
+            color: #999;
+            font-size: 12px;
+            margin: 15px 0;
+        }
+
+        /* 输入区域 */
+        .input-area {
+            padding: 20px;
+            background: white;
+            border-top: 1px solid #e1e4e8;
+            display: flex;
+            gap: 10px;
+        }
+        .input-area input {
+            flex: 1;
+            padding: 10px 15px;
+            border: 1px solid #e1e4e8;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+        .input-area button {
+            padding: 10px 20px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        .input-area button:hover {
+            background: #5a67d8;
+        }
+        .btn-attach {
+            padding: 10px 15px;
+            background: #f6f8fa;
+            border: 1px solid #e1e4e8;
+            color: #333;
+        }
+        .btn-attach:hover {
+            background: #e1e4e8;
+        }
+
+        /* 右侧成员列表 */
+        .members-panel {
+            width: 260px;
+            background: #f6f8fa;
+            border-left: 1px solid #e1e4e8;
+            padding: 20px;
+            overflow-y: auto;
+        }
+        .members-panel h4 {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+        }
+        .member-item {
+            display: flex;
+            align-items: center;
+            padding: 8px 0;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+        .member-item:hover {
+            opacity: 0.8;
+        }
+        .member-avatar {
+            width: 32px;
+            height: 32px;
+            background: #667eea;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 12px;
+            margin-right: 10px;
+        }
+        .member-details {
+            flex: 1;
+        }
+        .member-name {
+            font-size: 14px;
+            color: #333;
+        }
+        .member-status {
+            font-size: 12px;
+            color: #999;
+        }
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 5px;
+        }
+        .status-dot.online {
+            background: #2ecc71;
+        }
+        .status-dot.offline {
+            background: #95a5a6;
+        }
+        .activity-log {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #e1e4e8;
+        }
+        .activity-item {
+            font-size: 12px;
+            color: #666;
+            padding: 5px 0;
+        }
+        .activity-item .time {
+            color: #999;
+        }
+
+        /* 响应式媒体查询 */
+        @media (max-width: 768px) {
+            .sidebar { width: 70px; }
+            .group-item span { display: none; }
+            .user-info .name { display: none; }
+            .members-panel { display: none; }
+            .message-content { max-width: 80%; }
+        }
+    </style>
+</head>
+<body>
+<!-- 主界面容器 -->
+<div class="main-container">
+    <!-- 左侧边栏 -->
+    <div class="sidebar">
+        <!-- 用户信息 -->
+        <div class="user-info">
+            <span class="avatar">张</span>
+            <span class="name">
+                    张老师
+                    <span class="role">教师</span>
+                </span>
+        </div>
+
+        <!-- 分组列表 -->
+        <div class="group-section">
+            <!-- 班级大组 -->
+            <div class="group-header">班级</div>
+            <div class="group-item active">
+                <span>📚 计科201班</span>
+                <span class="unread-count">3</span>
+            </div>
+
+            <!-- 学习小组 -->
+            <div class="group-header">学习小组</div>
+            <div class="group-item">
+                <span>💻 算法学习组<span class="online-indicator"></span></span>
+                <span class="unread-count">1</span>
+            </div>
+            <div class="group-item">
+                <span>🎯 项目实践组</span>
+            </div>
+            <div class="group-item">
+                <span>📖 数据库小组</span>
+            </div>
+
+            <!-- 私聊 -->
+            <div class="group-header">私聊</div>
+            <div class="group-item">
+                <span>👤 李同学<span class="online-indicator"></span></span>
+                <span class="unread-count">2</span>
+            </div>
+            <div class="group-item">
+                <span>👤 王同学</span>
+            </div>
+        </div>
+
+        <!-- 操作按钮 -->
+        <div class="sidebar-actions">
+            <button class="btn-create-group">+ 创建小组</button>
+        </div>
+    </div>
+
+    <!-- 中间聊天区域 -->
+    <div class="chat-area">
+        <!-- 聊天头部 -->
+        <div class="chat-header">
+            <div>
+                <h3>计科201班</h3>
+                <span class="status">80 名成员 · 42 人在线</span>
+            </div>
+            <div class="header-actions">
+                <button>📁 文件</button>
+                <button>📢 公告</button>
+                <button>⚙️ 设置</button>
+            </div>
+        </div>
+
+        <!-- 消息显示区 -->
+        <div class="messages-container">
+            <!-- 系统消息 -->
+            <div class="system-message">
+                —— 李同学 加入了小组 ——
+            </div>
+
+            <!-- 普通消息 -->
+            <div class="message">
+                <div class="message-avatar">李</div>
+                <div class="message-content">
+                    <div class="message-info">李同学 · 10:30</div>
+                    <div class="message-bubble">老师，关于今天的算法作业，递归部分有些不太理解，可以再讲解一下吗？</div>
+                </div>
+            </div>
+
+            <!-- 教师回复 -->
+            <div class="message self">
+                <div class="message-avatar">张</div>
+                <div class="message-content">
+                    <div class="message-info">张老师 · 10:32</div>
+                    <div class="message-bubble">好的，我整理了一份详细的解析文档，大家可以参考一下</div>
+                </div>
+            </div>
+
+            <!-- 文件消息 -->
+            <div class="message self">
+                <div class="message-avatar">张</div>
+                <div class="message-content">
+                    <div class="message-info">张老师 · 10:33</div>
+                    <div class="file-message">
+                        📄 递归算法详解.pdf
+                        <span style="color: #666; font-size: 12px;">2.3 MB</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 系统消息 -->
+            <div class="system-message">
+                —— 王同学 离开了小组 ——
+            </div>
+
+            <!-- 更多消息 -->
+            <div class="message">
+                <div class="message-avatar">王</div>
+                <div class="message-content">
+                    <div class="message-info">王同学 · 10:45</div>
+                    <div class="message-bubble">收到，谢谢老师！</div>
+                </div>
+            </div>
+
+            <div class="message">
+                <div class="message-avatar">赵</div>
+                <div class="message-content">
+                    <div class="message-info">赵同学 · 10:48</div>
+                    <div class="message-bubble">老师，我们小组想申请创建一个项目讨论组，需要您审批</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 输入区域 -->
+        <div class="input-area">
+            <button class="btn-attach">📎</button>
+            <input type="text" placeholder="输入消息...（支持 @提及）">
+            <button>发送</button>
+        </div>
+    </div>
+
+    <!-- 右侧成员列表 -->
+    <div class="members-panel">
+        <h4>在线成员 (42)</h4>
+
+        <!-- 教师 -->
+        <div class="member-item">
+            <div class="member-avatar">张</div>
+            <div class="member-details">
+                <div class="member-name">张老师</div>
+                <div class="member-status">
+                    <span class="status-dot online"></span>在线
+                </div>
+            </div>
+        </div>
+
+        <!-- 学生列表 -->
+        <div class="member-item">
+            <div class="member-avatar">李</div>
+            <div class="member-details">
+                <div class="member-name">李同学</div>
+                <div class="member-status">
+                    <span class="status-dot online"></span>正在输入...
+                </div>
+            </div>
+        </div>
+
+        <div class="member-item">
+            <div class="member-avatar">王</div>
+            <div class="member-details">
+                <div class="member-name">王同学</div>
+                <div class="member-status">
+                    <span class="status-dot offline"></span>5分钟前
+                </div>
+            </div>
+        </div>
+
+        <div class="member-item">
+            <div class="member-avatar">赵</div>
+            <div class="member-details">
+                <div class="member-name">赵同学</div>
+                <div class="member-status">
+                    <span class="status-dot online"></span>在线
+                </div>
+            </div>
+        </div>
+
+        <!-- 活动日志 -->
+        <div class="activity-log">
+            <h4>最近活动</h4>
+            <div class="activity-item">
+                <span class="time">10:45</span> 李同学加入小组
+            </div>
+            <div class="activity-item">
+                <span class="time">10:30</span> 张老师分享了文件
+            </div>
+            <div class="activity-item">
+                <span class="time">10:15</span> 王同学离开小组
+            </div>
+            <div class="activity-item">
+                <span class="time">09:50</span> 创建了算法学习组
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 简单交互模拟 -->
+<script>
+    // 切换分组高亮
+    document.querySelectorAll('.group-item').forEach(item => {
+        item.addEventListener('click', function() {
+            document.querySelector('.group-item.active')?.classList.remove('active');
+            this.classList.add('active');
+        });
+    });
+</script>
+</body>
+</html>
+```
+
+<!-- 📋 原型分析总结 -->
+<!--
+**需求分析结果：**
+- **产品类型**：教育领域的实时通讯协作平台（Web端）
+- **核心用户**：教师（管理权限）和学生（普通权限）
+- **关键功能点**：JWT认证、分组管理、实时消息、文件共享、在线状态显示
+
+**设计决策：**
+1. **三栏式布局**：左侧导航（分组列表）+ 中间聊天区 + 右侧成员列表，这是即时通讯产品的经典布局
+2. **角色区分**：通过标签和颜色区分教师/学生身份
+3. **分层结构**：班级大组 → 学习小组 → 私聊的层级关系
+4. **实时状态**：在线指示器、"正在输入"、活动日志等体现WebSocket实时性
+5. **文件共享**：独立的文件消息样式，支持教学资料分发
+6. **响应式设计**：移动端自动隐藏次要面板，优化小屏体验
+
+该原型展示了平台的主要交互流程，包括群聊界面、成员管理、消息发送和文件共享等核心功能。
+-->

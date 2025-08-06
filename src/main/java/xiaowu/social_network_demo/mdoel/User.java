@@ -7,9 +7,12 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.apache.ibatis.annotations.Many;
 import xiaowu.social_network_demo.enums.UserRole;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Table(name = "users")
@@ -35,6 +38,12 @@ public class User {
     @Enumerated(EnumType.STRING)
     @Column(name = "role")
     private UserRole role;
+
+    @ManyToMany(mappedBy = "members")
+    private Set<Group> groups = new HashSet<>();
+
+    @ManyToMany(mappedBy = "members")
+    private Set<ClassGroup> classGroups = new HashSet<>();
 
     @Column(name = "real_name")
     private String realName;
