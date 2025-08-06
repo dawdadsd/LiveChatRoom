@@ -1,10 +1,12 @@
 package xiaowu.social_network_demo.interceptor;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.annotation.Resource;
 import lombok.Data;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.*;
 import xiaowu.social_network_demo.mdoel.ChatMessage;
+import xiaowu.social_network_demo.service.ChatMessageService;
 import xiaowu.social_network_demo.service.ConnectionManager;
 import xiaowu.social_network_demo.service.MessageRouter;
 
@@ -27,6 +29,10 @@ public class ChatWebSocketHandler implements WebSocketHandler {
 
     // Jackson对象映射器，用于JSON序列化/反序列化
     private final ObjectMapper objectMapper = new ObjectMapper();
+
+    //
+    @Resource
+    private ChatMessageService chatMessageService;
 
     /**
      * 连接建立成功后回调
@@ -69,6 +75,9 @@ public class ChatWebSocketHandler implements WebSocketHandler {
             try {
                 // 解析消息内容
                 ChatMessage chatMessage = parseMessage(payload, clientIp, sessionId);
+
+                //TODO 将消息持久化到数据库中
+                chatMessageService.saveMessageAsync(chatMessage);
 
                 // 路由消息到目标用户
                 messageRouter.routeMessage(chatMessage);
@@ -139,7 +148,7 @@ public class ChatWebSocketHandler implements WebSocketHandler {
             return ChatMessage.builder()
                     .messageId(generateMessageId())
                     .fromIp(fromIp)
-                    .fromSessionId(sessionId)
+                    .SessionId(sessionId)
                     .messageType(getMessageType(messageMap))
                     .content(getMessageContent(messageMap))
                     .targetIp(getTargetIp(messageMap))
@@ -151,7 +160,7 @@ public class ChatWebSocketHandler implements WebSocketHandler {
             return ChatMessage.builder()
                     .messageId(generateMessageId())
                     .fromIp(fromIp)
-                    .fromSessionId(sessionId)
+                    .SessionId(sessionId)
                     .messageType(ChatMessage.MessageType.TEXT)
                     .content(payload)
                     .timestamp(System.currentTimeMillis())
