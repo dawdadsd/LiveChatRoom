@@ -37,7 +37,7 @@ public class MessageRouter {
             sendToIp(targetIp, message);
         } else {
             // 广播消息
-            broadcastMessage(message, message.getFromSessionId());
+            broadcastMessage(message, message.getSessionId());
         }
     }
 
