@@ -21,6 +21,8 @@ public class WebSocketInterceptor implements HandshakeInterceptor {
         attributes.put("clientIp", clientIp);
 
         //获取use-agent
+        String userAgent = request.getHeaders().getFirst("User-Agent");
+        attributes.put("User-Agent", userAgent);
 
         System.out.println("WebSocket请求 : " + clientIp);
         return true;
