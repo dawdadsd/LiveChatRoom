@@ -1,6 +1,10 @@
 package xiaowu.social_network_demo.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.socket.TextMessage;
@@ -16,13 +20,11 @@ import java.io.IOException;
  * 它是业务逻辑和底层WebSocket连接之间的桥梁。
  */
 @Service
+@Slf4j
+@AllArgsConstructor
 public class MessageRouter {
-
-    @Autowired
     private ConnectionManager connectionManager;
-
     private final ObjectMapper objectMapper = new ObjectMapper();
-
     /**
      * 主路由方法
      *
@@ -31,7 +33,6 @@ public class MessageRouter {
      */
     public void routeMessage(ChatMessage message) {
         String targetIp = message.getTargetIp();
-
         if (targetIp != null && !targetIp.isBlank()) {
             // 点对点消息
             sendToIp(targetIp, message);
@@ -40,7 +41,6 @@ public class MessageRouter {
             broadcastMessage(message, message.getSessionId());
         }
     }
-
     /**
      * 广播消息给所有连接的用户（可选择排除某个会话）
      *
@@ -48,14 +48,11 @@ public class MessageRouter {
      * @param excludeSessionId 要排除的会话ID（通常是发送者自己）
      */
     public void broadcastMessage(ChatMessage message, String excludeSessionId) {
-        // 将消息对象序列化为JSON字符串
+        log.info("将消息对象序列化为JSON字符串");
         String messageJson = serializeMessage(message);
         if (messageJson == null) return;
-
         TextMessage textMessage = new TextMessage(messageJson);
-
-        System.out.println("📢 广播消息: " + message.getContent());
-
+       log.info("消息内容 : {}" , textMessage );
         connectionManager.getAllSessions().forEach(session -> {
             // 排除发送者自己
             if (!session.getId().equals(excludeSessionId)) {
@@ -73,11 +70,8 @@ public class MessageRouter {
     public void sendToIp(String targetIp, ChatMessage message) {
         String messageJson = serializeMessage(message);
         if (messageJson == null) return;
-
         TextMessage textMessage = new TextMessage(messageJson);
-
-        System.out.println("🎯 点对点消息: From " + message.getFromIp() + " -> To " + targetIp);
-
+        log.info("实现消息的点对点发送");
         connectionManager.getSessionsByIp(targetIp).forEach(session -> {
             sendMessage(session, textMessage);
         });
@@ -110,12 +104,12 @@ public class MessageRouter {
      * @param message 消息对象
      * @return JSON字符串, or null if serialization fails
      */
-    private String serializeMessage(ChatMessage message) {
+    public String serializeMessage(ChatMessage message) {
         try {
             return objectMapper.writeValueAsString(message);
         } catch (JsonProcessingException e) {
-            System.err.println("❌ 消息序列化失败: " + e.getMessage());
-            return null;
+            log.warn("将消息初始化失败");
+            throw new IllegalArgumentException("消息初始化失败");
         }
     }
 }
