@@ -34,6 +34,11 @@ public class ChatMessage {
      */
     @Column(name = "fromIp", nullable = false, length = 50)
     private String fromIp;
+    /**
+     *  群组消息发送
+     */
+    @Column(name = "groupId",nullable = false)
+    private Integer groupId;
 
     /**
      * 发送者会话ID
@@ -72,6 +77,7 @@ public class ChatMessage {
      */
     public enum MessageType {
         TEXT,       // 普通文本消息
+        GROUP,
         SYSTEM,     // 系统消息
         ERROR,      // 错误消息
         HEARTBEAT,// 心跳消息（后续扩展用）

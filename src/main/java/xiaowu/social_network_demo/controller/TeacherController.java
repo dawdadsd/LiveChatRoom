@@ -21,9 +21,7 @@ import java.util.List;
 @RequestMapping("/api/teacher")
 @RequiredArgsConstructor
 public class TeacherController {
-
     private final TeacherService teacherService;
-
     /**
      * 获取所有学生列表（教师权限）
      */

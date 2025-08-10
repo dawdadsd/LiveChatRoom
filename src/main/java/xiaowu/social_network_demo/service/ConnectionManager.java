@@ -1,5 +1,6 @@
 package xiaowu.social_network_demo.service;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.socket.WebSocketSession;
 
@@ -10,10 +11,12 @@ import java.util.stream.Collectors;
 
 /**
  * WebSocket连接管理器
- *
- * 📖 负责维护所有活跃的WebSocket连接，是整个系统的"在线用户花名册"
- * 必须设计为线程安全的，因为连接和断开是高并发操作。
+ * 面试官可能问的问题 ： 或者你在回答ConcurrentHashMap时候如何回答？
+ * 示例:
+ *      我在这个社交网络系统的时候，因为我们虽然用户不多，对于并发问题不多见，
+ *      但是其实我们还是去做防止出现并发问题的Websocket连接
  */
+@Slf4j
 @Service
 public class ConnectionManager {
 
@@ -36,13 +39,13 @@ public class ConnectionManager {
      * @param clientIp 客户端IP
      */
     public void addConnection(String sessionId, WebSocketSession session, String clientIp) {
-        // 原子性地更新所有映射关系
-        synchronized (this) {
-            sessionMap.put(sessionId, session);
-            sessionIdToIpMap.put(sessionId, clientIp);
-            ipToSessionIdsMap.computeIfAbsent(clientIp, k -> ConcurrentHashMap.newKeySet()).add(sessionId);
-        }
-        System.out.println("📇 连接管理器: 新增连接, IP: " + clientIp + ", Total Sessions: " + sessionMap.size());
+       //这里没必要加锁
+        sessionMap.put(sessionId,session);
+        sessionIdToIpMap.put(sessionId,clientIp);
+        ipToSessionIdsMap.computeIfAbsent(clientIp,k-> ConcurrentHashMap.newKeySet()).add(sessionId);
+        //为什么没必要加锁？
+        //因为ConcurrentHashMap中的put 和 computeIfAbsent是原子性的，这样可以产生性能优化
+        log.info("添加连接成功");
     }
 
     /**
@@ -53,12 +56,10 @@ public class ConnectionManager {
         if (!sessionMap.containsKey(sessionId)) {
             return;
         }
-
         // 原子性地移除所有相关映射
         synchronized (this) {
             sessionMap.remove(sessionId);
             String clientIp = sessionIdToIpMap.remove(sessionId);
-
             if (clientIp != null) {
                 Set<String> sessionIds = ipToSessionIdsMap.get(clientIp);
                 if (sessionIds != null) {

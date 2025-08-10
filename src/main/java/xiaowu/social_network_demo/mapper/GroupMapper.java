@@ -24,4 +24,8 @@ public interface GroupMapper extends BaseMapper<Group> {
 
     @Select("SELECT COUNT(*) > 0 FROM group_members WHERE group_id = #{groupId} AND user_id = #{userId}")
     boolean isUserInGroup(@Param("groupId") Integer groupId, @Param("userId") Integer userId);
+
+    boolean isMemberInGroup(@Param("groupId") Integer groupId,@Param("userIp") String userIp);
+
+    List<String> getGroupMemberIps(@Param("groupId") Integer groupId);
 }
