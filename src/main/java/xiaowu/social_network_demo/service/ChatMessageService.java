@@ -8,6 +8,9 @@ import xiaowu.social_network_demo.mdoel.ChatMessage;
 import xiaowu.social_network_demo.repository.ChatMessageRepository;
 
 import java.util.List;
+import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * 聊天消息服务层
@@ -20,6 +23,9 @@ import java.util.List;
 public class ChatMessageService {
 
     private final ChatMessageRepository chatMessageRepository;
+
+    // 创建一个大小为10个线程的线程池
+    ExecutorService threadPool = Executors.newFixedThreadPool(10);
 
     /**
      * 保存聊天消息到数据库
@@ -46,8 +52,11 @@ public class ChatMessageService {
      */
     @Transactional
     public void saveMessageAsync(ChatMessage message) {
+
         try {
+            //TODO 创建新的线程来保存消息
             chatMessageRepository.save(message);
+
             log.debug("💾 异步消息保存成功 - From: {}", message.getFromIp());
         } catch (Exception e) {
             log.error("❌ 异步消息保存失败 - From: {}, Error: {}", message.getFromIp(), e.getMessage());

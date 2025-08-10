@@ -3,15 +3,19 @@ package xiaowu.social_network_demo.interceptor;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.Resource;
 import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.*;
 import xiaowu.social_network_demo.mdoel.ChatMessage;
 import xiaowu.social_network_demo.service.ChatMessageService;
 import xiaowu.social_network_demo.service.ConnectionManager;
+import xiaowu.social_network_demo.service.ConnectionStateService;
 import xiaowu.social_network_demo.service.MessageRouter;
-
+import xiaowu.social_network_demo.utils.Redis;
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
+import xiaowu.social_network_demo.model.ConnectionState;
 
 
 /**
@@ -19,16 +23,26 @@ import java.util.Map;
  *
  * 📖 这是整个实时通信系统的核心调度器
  * 负责连接管理、消息路由、异常处理等关键职责
+ private final MessageRouter messageRouter;
+
  */
+@Slf4j
 @Component
 @Data
 public class ChatWebSocketHandler implements WebSocketHandler {
-
-    private final ConnectionManager connectionManager;
-    private final MessageRouter messageRouter;
-
     // Jackson对象映射器，用于JSON序列化/反序列化
     private final ObjectMapper objectMapper = new ObjectMapper();
+
+    private final ConnectionManager connectionManager;
+
+    @Resource
+    private final MessageRouter messageRouter;
+
+    @Resource
+    private ConnectionStateService connectionStateService;
+
+    @Resource
+    private Redis redis;
 
     //
     @Resource
@@ -44,11 +58,32 @@ public class ChatWebSocketHandler implements WebSocketHandler {
         // 从会话属性中获取客户端IP（由拦截器设置）
         String clientIp = (String) session.getAttributes().get("clientIp");
         String sessionId = session.getId();
+        String userAgent = (String) session.getAttributes().get("User-Agent");
 
         System.out.println("🎉 新用户连接 - SessionId: " + sessionId + ", IP: " + clientIp);
 
-        // 将新连接注册到连接管理器
-        connectionManager.addConnection(sessionId, session, clientIp);
+        // 将连接信息存入redis中
+        try {
+            // 处理连接状态管理
+            ConnectionStateService.ConnectionResult connectionResult =
+                    connectionStateService.handleNewConnection(sessionId, clientIp, userAgent);
+
+            // 将新连接注册到连接管理器
+            connectionManager.addConnection(sessionId, session, clientIp);
+
+            // 根据是否为重连决定不同的处理逻辑
+            if (connectionResult.isReconnection()) {
+                handleReconnection(session, clientIp, connectionResult);
+            } else {
+                handleFirstConnection(session, clientIp);
+            }
+
+        } catch (Exception e) {
+            log.error("❌ 连接建立处理异常 - SessionId: {}, Error: {}", sessionId, e.getMessage());
+            // 即使Redis操作失败，也要保证基本的WebSocket功能
+            handleFirstConnection(session, clientIp);
+        }
+
 
         // 发送欢迎消息给刚连接的用户
         sendWelcomeMessage(session, clientIp);
@@ -76,8 +111,10 @@ public class ChatWebSocketHandler implements WebSocketHandler {
                 // 解析消息内容
                 ChatMessage chatMessage = parseMessage(payload, clientIp, sessionId);
 
-                //TODO 将消息持久化到数据库中
+
+
                 chatMessageService.saveMessageAsync(chatMessage);
+
 
                 // 路由消息到目标用户
                 messageRouter.routeMessage(chatMessage);
@@ -119,6 +156,9 @@ public class ChatWebSocketHandler implements WebSocketHandler {
 
         // 从连接管理器中移除连接
         connectionManager.removeConnection(sessionId);
+
+        // 从redis中删除连接信息
+        redis.remove(sessionId);
 
         // 通知其他用户有人离开
         broadcastUserLeaveMessage(clientIp, sessionId);
@@ -255,7 +295,71 @@ public class ChatWebSocketHandler implements WebSocketHandler {
         return (String) messageMap.getOrDefault("content", "");
     }
 
-    private String getTargetIp(Map<String, Object> messageMap) {
-        return (String) messageMap.get("targetIp");
+    private String getTargetIp(Map<String, Object> messageMap){
+        return (String) messageMap.getOrDefault("targetIp", "");
+    }
+
+
+   /* 首次连接*/
+    private void handleFirstConnection(WebSocketSession session, String clientIp) {
+        // 发送欢迎消息
+        sendWelcomeMessage(session, clientIp);
+
+        // 广播用户加入消息
+        broadcastUserJoinMessage(clientIp, session.getId());
+
+        System.out.println(" 首次连接处理完成 - IP: " + clientIp);
+    }
+
+   /* 处理重连*/
+    private void handleReconnection(WebSocketSession session, String clientIp,
+                                    ConnectionStateService.ConnectionResult connectionResult) {
+        // 发送重连欢迎消息
+        sendReconnectionMessage(session, clientIp, connectionResult.getReconnectCount());
+
+        // 推送最近消息历史（可选）
+        if (!connectionResult.getRecentMessages().isEmpty()) {
+            sendRecentMessages(session, connectionResult.getRecentMessages());
+        }
+
+        // 不广播用户加入消息，避免重复通知
+        System.out.println(" 重连处理完成 - IP: " + clientIp + ", 重连次数: " + connectionResult.getReconnectCount());
+    }
+    /**
+     * 发送重连欢迎消息
+     */
+    private void sendReconnectionMessage(WebSocketSession session, String clientIp, int reconnectCount) {
+        ChatMessage reconnectMessage = ChatMessage.builder()
+                .messageType(ChatMessage.MessageType.SYSTEM)
+                .content(String.format("欢迎回来！您的IP地址是: %s (第%d次重连)", clientIp, reconnectCount + 1))
+                .timestamp(System.currentTimeMillis())
+                .build();
+
+        sendMessageToSession(session, reconnectMessage);
+    }
+
+
+    /**
+     * 发送最近消息历史
+     */
+    private void sendRecentMessages(WebSocketSession session, List<ChatMessage> recentMessages) {
+        // 发送历史消息提示
+        ChatMessage historyTip = ChatMessage.builder()
+                .messageType(ChatMessage.MessageType.SYSTEM)
+                .content(" 以下是您离线期间的消息历史:")
+                .timestamp(System.currentTimeMillis())
+                .build();
+
+        sendMessageToSession(session, historyTip);
+
+        // 发送历史消息
+        recentMessages.forEach(message -> {
+            try {
+                Thread.sleep(50); // 避免消息发送过快
+                sendMessageToSession(session, message);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+        });
     }
 }

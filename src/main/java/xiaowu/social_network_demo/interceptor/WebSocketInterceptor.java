@@ -19,6 +19,9 @@ public class WebSocketInterceptor implements HandshakeInterceptor {
                                    Map<String, Object> attributes) throws Exception{
         String clientIp = getRealClientIp(request);
         attributes.put("clientIp", clientIp);
+
+        //获取use-agent
+
         System.out.println("WebSocket请求 : " + clientIp);
         return true;
     }
