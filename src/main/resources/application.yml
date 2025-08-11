@@ -6,7 +6,17 @@ app:
 
 spring:
   datasource:
-    url: jdbc:mysql://localhost:3306/social_network?useSSL=false&serverTimezone=UTC
+    url: jdbc:mysql://localhost:3307/social_network?useSSL=false&serverTimezone=UTC
     username: root
-    password: root
+    password: 12345
     driver-class-name: com.mysql.cj.jdbc.Driver
+  servlet:
+    multipart:
+      max-file-size: 100MB
+      max-request-size: 100MB
+file:
+  upload:
+    path: ./uploads
+    max-size: 104857600 # 100MB
+  storage:
+    threshold: 90            # 存储空间使用率阈值(%)
