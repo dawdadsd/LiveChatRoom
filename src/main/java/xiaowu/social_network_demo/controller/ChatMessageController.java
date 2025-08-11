@@ -10,6 +10,8 @@ import xiaowu.social_network_demo.mdoel.ChatMessage;
 import xiaowu.social_network_demo.service.ChatMessageService;
 import xiaowu.social_network_demo.service.GroupMessageService;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/chat")
 @Data
@@ -26,7 +28,7 @@ public class ChatMessageController {
         return messageService.sendGroupMessage(groupId,content,UserIp,sessionId);
     }
 
-    public Result<ChatMessage> getConversation(Integer groupId) {
+    public Result<List<ChatMessage>> getConversation(Integer groupId) {
         return Result.success("获取对话记录成功",chatMessageService.getGroupMessages(groupId) );
     }
 }
