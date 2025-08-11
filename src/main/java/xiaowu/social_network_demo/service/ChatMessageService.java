@@ -98,4 +98,13 @@ public class ChatMessageService {
             return List.of();
         }
     }
+
+    public List<ChatMessage> getGroupMessages(Integer groupId) {
+        try {
+            return chatMessageRepository.findGroupMessages(groupId);
+        } catch (Exception e) {
+            log.error("❌ 查询群组消息失败 - Error: {}", e.getMessage());
+            return List.of();
+        }
+    }
 }

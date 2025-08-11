@@ -31,4 +31,8 @@ public interface ChatMessageRepository extends JpaRepository<ChatMessage, Intege
      */
     @Query("SELECT cm FROM ChatMessage cm WHERE cm.targetIp IS NULL ORDER BY cm.timestamp DESC")
     List<ChatMessage> findRecentBroadcastMessages();
+
+
+    @Query("SELECT cm FROM ChatMessage cm WHERE cm.groupId = :groupId ORDER BY cm.timestamp ASC")
+    List<ChatMessage> findGroupMessages(Integer groupId);
 }
